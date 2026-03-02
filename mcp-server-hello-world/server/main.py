@@ -35,7 +35,7 @@ def main():
     args = parser.parse_args()
 
     uvicorn.run(
-        "server.app:combined_app",  # Import path to the combined FastAPI application
+        "server.app:app",  # Import path to the FastAPI application (Atlassian MCP proxy)
         host="0.0.0.0",  # Listen on all network interfaces
         port=args.port,  # Port from command line argument or default
     )
