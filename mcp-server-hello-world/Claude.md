@@ -220,6 +220,49 @@ current_user = user_client.current_user.me()
 
 **Real-world example:** See `get_current_user` tool in `server/tools.py` which uses user authentication to retrieve the current user's information.
 
+### Using Atlassian APIs
+
+The project includes utilities for Atlassian API authentication and integration:
+
+```python
+from server import utils
+
+# Get Atlassian configuration from environment variables
+config = utils.get_atlassian_config()
+# Returns: {"api_key": "...", "email": "...", "site_url": "..."}
+
+# Get authentication headers for API calls
+headers = utils.get_atlassian_auth_header()
+# Returns: {"Authorization": "Basic ...", "Accept": "application/json", ...}
+
+# Example: Call Jira REST API directly for custom logic
+response = requests.get(
+    f"{config['site_url']}/rest/api/3/projects",
+    headers=headers
+)
+```
+
+**Available Atlassian Tools in server/tools.py:**
+
+*Jira Tools:*
+- `search_jira(query, max_results)` - Search issues using JQL (Jira Query Language)
+- `list_jira_issues(project_key, status)` - List issues filtered by project and status
+- `create_jira_issue(project_key, issue_type, summary, description)` - Create new Jira issue
+- `get_jira_issue_details(issue_key)` - Get full issue details and metadata
+
+*Confluence Tools:*
+- `search_confluence(query, max_results)` - Search pages and content across spaces
+- `list_confluence_spaces()` - Get all accessible spaces and their keys
+- `create_confluence_page(space_key, title, body, parent_page_id)` - Create new page
+- `get_confluence_page_details(page_id)` - Get page content, version, and metadata
+
+**Required Environment Variables:**
+- `DATABRICKS_ATLASSIAN_API_KEY` - API token from https://id.atlassian.com/manage-profile/security/api-tokens
+- `DATABRICKS_ATLASSIAN_EMAIL` - Email associated with the API token
+- `DATABRICKS_ATLASSIAN_SITE_URL` - Atlassian site URL (e.g., https://your-domain.atlassian.net)
+
+See `.env.example` for template configuration.
+
 ## MCP Protocol Basics
 
 - **Tools**: Functions the AI can call

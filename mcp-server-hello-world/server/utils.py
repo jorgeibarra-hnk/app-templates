@@ -1,5 +1,6 @@
 import contextvars
 import os
+from base64 import b64encode
 
 from databricks.sdk import WorkspaceClient
 
@@ -28,3 +29,59 @@ def get_user_authenticated_workspace_client():
         )
 
     return WorkspaceClient(token=token, auth_type="pat")
+
+
+def get_atlassian_config() -> dict:
+    """
+    Get Atlassian configuration including API key and site URL.
+
+    Returns:
+        dict: Configuration with 'api_key', 'email', and 'site_url'
+
+    Raises:
+        ValueError: If required environment variables are not set
+    """
+    api_key = os.getenv("DATABRICKS_ATLASSIAN_API_KEY")
+    email = os.getenv("DATABRICKS_ATLASSIAN_EMAIL")
+    site_url = os.getenv("DATABRICKS_ATLASSIAN_SITE_URL")
+
+    if not api_key:
+        raise ValueError(
+            "DATABRICKS_ATLASSIAN_API_KEY environment variable is not set. "
+            "Please provide your Atlassian API token."
+        )
+
+    if not email:
+        raise ValueError(
+            "DATABRICKS_ATLASSIAN_EMAIL environment variable is not set. "
+            "Please provide your Atlassian email address."
+        )
+
+    if not site_url:
+        raise ValueError(
+            "DATABRICKS_ATLASSIAN_SITE_URL environment variable is not set. "
+            "Please provide your Atlassian site URL (e.g., https://your-domain.atlassian.net)."
+        )
+
+    return {"api_key": api_key, "email": email, "site_url": site_url}
+
+
+def get_atlassian_auth_header() -> dict:
+    """
+    Generate HTTP Authorization header for Atlassian REST API.
+
+    Returns:
+        dict: Headers with 'Authorization' for Basic auth and 'Accept' for JSON
+
+    Raises:
+        ValueError: If authentication configuration is missing
+    """
+    config = get_atlassian_config()
+    credentials = f"{config['email']}:{config['api_key']}"
+    encoded_credentials = b64encode(credentials.encode()).decode()
+    return {
+        "Authorization": f"Basic {encoded_credentials}",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+    }
+

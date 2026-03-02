@@ -17,7 +17,8 @@ dependencies = [
     "uvicorn>=0.34.2",
     "databricks-sdk>=0.60.0",
     "pydantic>=2",
-    "fastmcp>=2.12.5"
+    "fastmcp>=2.12.5",
+    "requests>=2.31.0"
 ]
 
 [dependency-groups]

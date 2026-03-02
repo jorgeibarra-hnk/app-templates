@@ -89,9 +89,84 @@ The server will start on `http://localhost:8000` by default (or your specified p
 ### Accessing the Server
 
 - **MCP Endpoints**: `http://localhost:8000/mcp`
-- **Available Tools**: 
+- **Available Tools**:
   - `health`: Check server status
   - `get_current_user`: Get authenticated user information
+  - **Jira Tools**: Search, list, create, and get details on Jira issues
+  - **Confluence Tools**: Search, list, create, and get details on Confluence pages
+
+## Atlassian Integration
+
+This MCP server includes built-in support for **Jira** and **Confluence** via the Atlassian Cloud APIs.
+
+### Setup
+
+1. **Get an API Token**:
+   - Go to https://id.atlassian.com/manage-profile/security/api-tokens
+   - Create a new API token and copy it
+
+2. **Set Environment Variables**:
+   ```bash
+   export DATABRICKS_ATLASSIAN_API_KEY="your_api_token"
+   export DATABRICKS_ATLASSIAN_EMAIL="your-email@example.com"
+   export DATABRICKS_ATLASSIAN_SITE_URL="https://your-domain.atlassian.net"
+   ```
+
+   Or create a `.env` file using `.env.example` as a template.
+
+### Available Atlassian Tools
+
+#### Jira Tools
+
+- **`search_jira(query, max_results)`** - Search issues using JQL
+  - Example: `search_jira("project = PROJ AND status = Open")`
+
+- **`list_jira_issues(project_key, status)`** - List issues in a project
+  - Example: `list_jira_issues("PROJ", "Open")`
+
+- **`create_jira_issue(project_key, issue_type, summary, description)`** - Create a new issue
+  - Example: `create_jira_issue("PROJ", "Bug", "Login page broken", "Users cannot log in")`
+
+- **`get_jira_issue_details(issue_key)`** - Get full issue details
+  - Example: `get_jira_issue_details("PROJ-123")`
+
+#### Confluence Tools
+
+- **`search_confluence(query, max_results)`** - Search for pages and content
+  - Example: `search_confluence("API documentation")`
+
+- **`list_confluence_spaces()`** - List all accessible spaces
+
+- **`create_confluence_page(space_key, title, body, parent_page_id)`** - Create a new page
+  - Example: `create_confluence_page("DOC", "Deployment Guide", "Steps to deploy...")`
+
+- **`get_confluence_page_details(page_id)`** - Get page content and metadata
+  - Example: `get_confluence_page_details("12345")`
+
+### Example Usage
+
+```python
+from databricks_mcp import DatabricksMCPClient
+
+mcp_client = DatabricksMCPClient(server_url="http://localhost:8000/mcp")
+
+# Search for open bugs
+bugs = mcp_client.call_tool("search_jira", {"query": "project = PROJ AND type = Bug AND status = Open"})
+print(bugs)
+
+# Create a new task
+ticket = mcp_client.call_tool("create_jira_issue", {
+    "project_key": "PROJ",
+    "issue_type": "Task",
+    "summary": "Update documentation",
+    "description": "Add API reference guide"
+})
+print(ticket)
+
+# Search documentation
+docs = mcp_client.call_tool("search_confluence", {"query": "API endpoints"})
+print(docs)
+```
 
 ## Testing the MCP Server
 
